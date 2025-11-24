@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Trazabilidad</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <button class="theme-toggle" id="themeToggle" aria-label="Cambiar tema">
+        <i class="ri-moon-line"></i>
+    </button>
+
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <div class="header-text">
+                    <h1>Trazabilidad de Materias Primas</h1>
+                    <p>Análisis de costes y proveedores</p>
+                </div>
+                <div class="header-status" id="fileStatus">
+                    <span class="status-dot"></span> Esperando archivo
+                </div>
+            </div>
+        </header>
+        
+        <section class="upload-section">
+            <div class="upload-box" id="dropZone">
+                <i class="ri-file-excel-2-line upload-icon"></i>
+                <h3>Sube tu archivo Excel</h3>
+                <p>Arrastra el archivo aquí o haz clic para buscar</p>
+                <input type="file" id="fileInput" accept=".xlsx, .xls">
+                <div class="file-name" id="fileName"></div>
+            </div>
+        </section>
+        
+        <main id="mainContent" style="display: none;">
+            
+            <section class="filters-section">
+                <div class="filter-group">
+                    <label><i class="ri-calendar-line"></i> Mes</label>
+                    <select id="monthFilter"><option value="all">Todo el año</option></select>
+                </div>
+                
+                <div class="filter-group">
+                    <label><i class="ri-box-3-line"></i> Materia Prima</label>
+                    <select id="materialFilter"><option value="all">Todas</option></select>
+                </div>
+                
+                <div class="filter-group">
+                    <label><i class="ri-store-2-line"></i> Proveedor</label>
+                    <select id="supplierFilter"><option value="all">Todos</option></select>
+                </div>
+                
+                <div class="filter-group search-group">
+                    <label><i class="ri-search-line"></i> Buscar</label>
+                    <input type="text" id="searchFilter" placeholder="Buscar descripción...">
+                </div>
+
+                <div class="filter-group" style="display: flex; align-items: flex-end;">
+    <button id="resetFilters" class="btn-reset">
+        <i class="ri-filter-off-line"></i> Limpiar
+    </button>
+</div>
+            </section>
+            
+            <section class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-icon money"><i class="ri-money-euro-circle-line"></i></div>
+                    <div class="kpi-info">
+                        <h3>Total Gastado</h3>
+                        <div class="value" id="totalSpent">0 €</div>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon box"><i class="ri-stack-line"></i></div>
+                    <div class="kpi-info">
+                        <h3>Materias Primas</h3>
+                        <div class="value" id="totalMaterials">0</div>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon truck"><i class="ri-truck-line"></i></div>
+                    <div class="kpi-info">
+                        <h3>Proveedores</h3>
+                        <div class="value" id="totalSuppliers">0</div>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon chart"><i class="ri-bar-chart-grouped-line"></i></div>
+                    <div class="kpi-info">
+                        <h3>Precio Medio</h3>
+                        <div class="value" id="avgPrice">0 €</div>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="charts-section">
+                <div class="chart-container large">
+                    <div class="chart-header">
+                        <h2><i class="ri-line-chart-line"></i> Evolución Mensual del Gasto</h2>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="monthlyChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="chart-grid-half">
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h2><i class="ri-pie-chart-line"></i> Top Materiales (Gasto)</h2>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="materialsChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h2><i class="ri-building-line"></i> Top Proveedores</h2>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="suppliersChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="data-section">
+                <div class="tabs">
+                    <button class="tab-btn active" data-target="details">Detalle de Movimientos</button>
+                    <button class="tab-btn" data-target="summary">Resumen Agrupado</button>
+                </div>
+
+                <div id="detailsView" class="view-panel active">
+                    <div class="table-container">
+                        <table id="dataTable">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Proveedor</th>
+                                    <th>Artículo</th>
+                                    <th>Descripción</th>
+                                    <th>Cantidad</th>
+                                    <th>Precio Unit.</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="summaryView" class="view-panel">
+                    <div class="table-container">
+                        <table id="summaryTable">
+                            <thead>
+                                <tr>
+                                    <th>Materia Prima</th>
+                                    <th>Cant. Total</th>
+                                    <th>Gasto Total</th>
+                                    <th>Precio Promedio</th>
+                                </tr>
+                            </thead>
+                            <tbody id="summaryBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </main>
+        
+        <footer>
+            <p>Sistema de Gestión &copy; 2025</p>
+        </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
