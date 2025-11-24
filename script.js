@@ -2,6 +2,7 @@
 let rawData = [];
 let filteredData = [];
 let charts = {}; // Objeto para guardar instancias de gráficos
+let materialAverages = {};
 
 // Elementos DOM
 const fileInput = document.getElementById('fileInput');
@@ -95,10 +96,9 @@ function handleFile(file) {
 
 // Procesar Datos
 function processData(data) {
+    // 1. Mapeo y Limpieza (Igual que antes)
     rawData = data.map(item => {
-        // Normalización de claves (case insensitive y variantes)
         const normalize = (key) => item[key] || item[Object.keys(item).find(k => k.toLowerCase().includes(key.toLowerCase()))];
-
         return {
             fecha: normalize('fecha') || normalize('date'),
             proveedor: normalize('proveedor') || 'Desconocido',
@@ -107,13 +107,27 @@ function processData(data) {
             cantidad: Number(normalize('cant') || 0),
             precio: Number(normalize('precio') || 0)
         };
+    }).filter(item => item.fecha);
+
+    // 2. NUEVO: Calcular Precios Promedio Históricos (Precio de Referencia)
+    // Usamos rawData para que el promedio sea GLOBAL (de todo el año), no solo del mes filtrado.
+    const stats = {};
+    rawData.forEach(item => {
+        if (!stats[item.descripcion]) stats[item.descripcion] = { totalSpent: 0, totalQty: 0 };
+        stats[item.descripcion].totalSpent += (item.cantidad * item.precio);
+        stats[item.descripcion].totalQty += item.cantidad;
     });
 
-    // Validar fechas
-    rawData = rawData.filter(item => item.fecha);
+    materialAverages = {};
+    Object.keys(stats).forEach(material => {
+        if (stats[material].totalQty > 0) {
+            materialAverages[material] = stats[material].totalSpent / stats[material].totalQty;
+        }
+    });
 
+    // 3. Inicializar interfaz
     populateFilters();
-    applyFilters(); // Esto disparará updateUI
+    applyFilters();
     mainContent.style.display = 'block';
 }
 
@@ -200,21 +214,47 @@ function updateKPIs() {
 }
 
 function updateTables() {
-    // Tabla Detalle (Limitada a 100 para rendimiento)
     const tbody = document.getElementById('tableBody');
-    tbody.innerHTML = filteredData.slice(0, 100).map(item => `
+    
+    tbody.innerHTML = filteredData.slice(0, 100).map(item => {
+        // --- LÓGICA DE ALERTAS ---
+        const avgPrice = materialAverages[item.descripcion] || 0;
+        let alertBadge = '';
+        
+        // Solo calculamos si hay precio y promedio válido
+        if (avgPrice > 0 && item.precio > 0) {
+            const diffPercent = ((item.precio - avgPrice) / avgPrice) * 100;
+            
+            // Umbral del 5% para que no salten alertas por céntimos irrelevantes
+            if (diffPercent > 5) {
+                // Subida de precio > 5% (ROJO)
+                alertBadge = `<span class="trend-badge trend-up" title="Precio un ${diffPercent.toFixed(1)}% mayor al promedio anual (${avgPrice.toFixed(2)}€)">
+                                <i class="ri-arrow-up-line"></i> ${Math.abs(diffPercent).toFixed(0)}%
+                              </span>`;
+            } else if (diffPercent < -5) {
+                // Bajada de precio > 5% (VERDE)
+                alertBadge = `<span class="trend-badge trend-down" title="Precio un ${Math.abs(diffPercent.toFixed(1))}% menor al promedio anual (${avgPrice.toFixed(2)}€)">
+                                <i class="ri-arrow-down-line"></i> ${Math.abs(diffPercent).toFixed(0)}%
+                              </span>`;
+            }
+        }
+        // -------------------------
+
+        return `
         <tr>
             <td>${formatDate(item.fecha)}</td>
             <td>${item.proveedor}</td>
             <td>${item.articulo}</td>
-            <td>${item.descripcion}</td>
+            <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${item.descripcion}">${item.descripcion}</td>
             <td>${item.cantidad}</td>
-            <td>${item.precio.toFixed(2)} €</td>
+            <td>
+                ${item.precio.toFixed(2)} €
+                ${alertBadge} </td>
             <td>${(item.cantidad * item.precio).toFixed(2)} €</td>
         </tr>
-    `).join('');
+    `}).join('');
     
-    // Tabla Resumen
+    // Tabla Resumen (Sin cambios, pero la incluyo para mantener el código completo si copias/pegas)
     const summaryMap = {};
     filteredData.forEach(item => {
         if(!summaryMap[item.descripcion]) {

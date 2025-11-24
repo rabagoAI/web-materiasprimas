@@ -292,6 +292,36 @@ th {
     border-color: #ef4444;
 }
 
+/* --- Alertas de Variación de Precio --- */
+.trend-badge {
+    font-size: 0.75rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-left: 8px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    vertical-align: middle;
+}
+
+/* Subida de precio (Malo -> Rojo) */
+.trend-up {
+    background-color: #fee2e2;
+    color: #ef4444;
+    border: 1px solid #fca5a5;
+}
+
+/* Bajada de precio (Bueno -> Verde) */
+.trend-down {
+    background-color: #dcfce7;
+    color: #166534;
+    border: 1px solid #86efac;
+}
+
+body.dark-mode .trend-up { background-color: #450a0a; color: #fca5a5; border-color: #7f1d1d; }
+body.dark-mode .trend-down { background-color: #052e16; color: #86efac; border-color: #14532d; }
+
 /* Asegurar que el botón se alinee con los inputs */
 .filters-section {
     align-items: flex-end; /* Alinea los inputs y el botón abajo */
