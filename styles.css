@@ -333,3 +333,4 @@ tr:hover td { background-color: var(--table-hover); }
 
 /* Footer */
 footer { text-align: center; color: var(--text-secondary); margin-top: 40px; font-size: 0.9rem; }
+.privacy-note { display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 0.8rem; margin-bottom: 6px; }

@@ -3,9 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Herramienta interna: que no aparezca en buscadores -->
+    <meta name="robots" content="noindex, nofollow">
     <title>Dashboard Trazabilidad</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <!-- Librerías y fuentes servidas desde la propia app (vendor/): ninguna petición a CDN ni a Google -->
+    <link href="vendor/fonts/inter.css" rel="stylesheet">
+    <link href="vendor/remixicon/remixicon.css" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -171,12 +174,13 @@
         </main>
         
         <footer>
+            <p class="privacy-note"><i class="ri-shield-check-line"></i> Los archivos se procesan solo en tu navegador; no se guardan ni se envían a ningún servidor.</p>
             <p>Sistema de Gestión &copy; 2025</p>
         </footer>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="vendor/chart.umd.min.js"></script>
+    <script src="vendor/xlsx.full.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
